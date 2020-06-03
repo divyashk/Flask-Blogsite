@@ -1,5 +1,5 @@
 {
-    "python.pythonPath": "/media/dk/Programming/flask/envflaskproject/bin/python3",
+    "python.pythonPath": "/media/dk/Programming/flask/envblog/bin/python3",
     "python.terminal.activateEnvironment": true,
     "python.terminal.activateEnvInCurrentTerminal": true
 }
