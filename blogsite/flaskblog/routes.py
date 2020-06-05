@@ -2,19 +2,20 @@ import os
 import secrets
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
-from flaskblog import app, db, bcrypt
-from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
+from flaskblog import app, db, bcrypt, mail
+from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, RequestResetForm, ResetPasswordForm
 from flaskblog.models import User, Post
 from flask_login import login_user, current_user, logout_user, login_required
-
-
+from flask_mail import Mail,Message
+import smtplib
 
 
 
 @app.route("/")     
-@app.route("/home")   
+@app.route("/home")  
 def home():
-    posts=Post.query.all();
+    page = request.args.get('page', 1, type=int);
+    posts=Post.query.order_by(Post.date_posted.desc()).paginate(per_page = 5, page = page);
     return render_template('home.html', title = "Home" ,posts = posts);  
 
 @app.route("/about")
@@ -71,7 +72,6 @@ def save_picture(form_picture):
     i.save(picture_path);
     return picture_fn
 
-
 @app.route("/account",methods=['GET','POST'])
 @login_required
 def account():
@@ -91,7 +91,6 @@ def account():
     image_file = url_for("static", filename = "profile-pic/" + current_user.image_file)
 
     return render_template('account.html', title="User Account", image_file = image_file, form = form);
-
 
 @app.route("/post/new", methods=["GET","POST"])
 @login_required
@@ -132,7 +131,6 @@ def update_post(post_id):
     form.content.data = post.content
     return render_template('create_post.html', title="update-post", form=form, legend="Update Post");
 
-
 @app.route("/post/<int:post_id>/delete", methods=["POST"])
 @login_required
 def delete_post(post_id):
@@ -144,3 +142,71 @@ def delete_post(post_id):
     flash('Your post has been deleted!', "success")
     return redirect(url_for("home"))
 
+@app.route("/user/<string:username>")
+def user_posts(username):
+    page = request.args.get('page', 1, type=int);
+    user = User.query.filter_by(username=username).first_or_404();
+
+    posts=Post.query.filter_by(author = user).order_by(Post.date_posted.desc())\
+        .paginate(per_page = 5, page = page);
+    return render_template('user_posts.html', user =user ,title = "user posts" ,posts = posts);  
+
+
+
+
+
+
+
+
+
+
+def send_email(user):
+    
+    EMAIL_ADDRESS = os.environ.get("BLOGIN_EMAIL_USER")
+    EMAIL_PASSWORD = os.environ.get("BLOGIN_EMAIL_PASS")
+
+    with smtplib.SMTP('smtp.gmail.com',587) as smtp:
+        smtp.ehlo()
+        smtp.starttls()
+        smtp.ehlo()
+        
+        smtp.login(EMAIL_ADDRESS,EMAIL_PASSWORD)
+        subject = 'Password Reset for Blogin'
+        token = user.get_reset_token()
+        body = 'To reset your password visit the following link:{}.\nIf not made by you then simply ignore and no changes will be made.'.format(url_for('reset_token', token = token, _external=True))
+        msg =  f'Subject: {subject}\n\n {body}'
+        smtp.sendmail(EMAIL_ADDRESS,user.email,msg)
+    
+
+
+@app.route("/reset_password", methods=['GET', 'POST'])
+def reset_request():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'));
+    form = RequestResetForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first();
+        send_email(user)
+
+        flash("An email has been sent to reset the password\n The email token will expire in 30 minutes", "info")
+        return redirect(url_for('login'))
+    return render_template('reset_request.html', title = 'Reset Password', form = form )
+
+
+@app.route("/reset_password/<token>", methods=['GET', 'POST'])
+def reset_token(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('home'));
+    user = User.verify_reset_token(token)
+    if user is None:
+        flash("Invalid or Expired Token", 'warning')
+        return redirect(url_for('reset_request'))
+    form = ResetPasswordForm() 
+    if form.validate_on_submit():
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode("utf-8");
+        user.password = hashed_password;
+        db.session.commit();
+        flash('Your password has been updated!', 'success')
+
+        return redirect(url_for('login'));
+    return render_template('reset_token.html', title = 'Reset Password', form = form)

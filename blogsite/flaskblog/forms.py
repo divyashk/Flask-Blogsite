@@ -23,8 +23,8 @@ class RegistrationForm( FlaskForm ):
             raise ValidationError("User name already taken. Please try again!");
 
     def validate_email(self, email):
-        email = User.query.filter_by(email = email.data).first();
-        if email:
+        user = User.query.filter_by(email = email.data).first();
+        if user:
             raise ValidationError("Email already taken. Please try again!");
 
 class LoginForm( FlaskForm ):      
@@ -58,5 +58,18 @@ class UpdateAccountForm( FlaskForm ):
 class PostForm(FlaskForm):
     title = StringField("Title", validators=[DataRequired()]);
     content = TextAreaField("Content", validators=[DataRequired()]);
-    
     submit = SubmitField("Post")
+
+class RequestResetForm(FlaskForm):
+    email = StringField('Email', validators = [DataRequired(), Email()]);
+    def validate_email(self, email):
+        user = User.query.filter_by(email = email.data).first();
+        if user is None:
+            raise ValidationError("There is no account with that email, please register!");
+    submit = SubmitField("Request Password reset")
+
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('Password', validators=[DataRequired()])
+    confirm_password = PasswordField('Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField("Reset Password")

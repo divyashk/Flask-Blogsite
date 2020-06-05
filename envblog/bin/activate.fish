@@ -1,3 +1,6 @@
+export BLOGIN_EMAIL_USER="blogin.help@gmail.com"
+export BLOGIN_EMAIL_PASS="Flaskblog@123"
+
 # This file must be used with ". bin/activate.fish" *from fish* (http://fishshell.org)
 # you cannot run it directly
 
