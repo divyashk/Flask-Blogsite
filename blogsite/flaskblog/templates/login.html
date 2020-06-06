@@ -60,7 +60,7 @@
             <div class='form-group'>
                {{ form.submit( class = 'btn btn-outline-info')}}
                <small class = "text-muted ml-2">
-                <a href="{{url_for('reset_request')}}">Forgot password?</a>
+                <a href="{{url_for('users.reset_request')}}">Forgot password?</a>
 
                 </small>
             </div> 
@@ -73,7 +73,7 @@
 
     <div class = 'boder-top pt-3'>
         <small class= 'text-muted'>
-            Wanna Register?<a class = 'ml-2' href = "{{ url_for('register')}}" >Register</a>
+            Wanna Register?<a class = 'ml-2' href = "{{ url_for('users.register')}}" >Register</a>
         </small>
     </div>
 {% endblock content %}

@@ -1,5 +1,10 @@
 export BLOGIN_EMAIL_USER="blogin.help@gmail.com"
 export BLOGIN_EMAIL_PASS="Flaskblog@123"
+export SECRET_KEY='479ac0a34b4290c30baffefc740a1d5b'
+export SQLALCHEMY_DATABASE_URI='sqlite:///site.db'
+export MAIL_SERVER='smtp.gmail.com'
+export MAIL_PORT=587
+export MAIL_USE_TLS=True
 
 # This file must be used with ". bin/activate.fish" *from fish* (http://fishshell.org)
 # you cannot run it directly
