@@ -24,19 +24,19 @@ def save_picture(form_picture):
 
 
 def send_email(user):
-    
+
     EMAIL_ADDRESS = os.environ.get("BLOGIN_EMAIL_USER")
     EMAIL_PASSWORD = os.environ.get("BLOGIN_EMAIL_PASS")
+
 
     with smtplib.SMTP('smtp.gmail.com',587) as smtp:
         smtp.ehlo()
         smtp.starttls()
         smtp.ehlo()
         
-        smtp.login(EMAIL_ADDRESS,EMAIL_PASSWORD)
+        smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
         subject = 'Password Reset for Blogin'
         token = user.get_reset_token()
         body = 'To reset your password visit the following link:{}.\nIf not made by you then simply ignore and no changes will be made.'.format(url_for('users.reset_token', token = token, _external=True))
-        msg =  f'Subject: {subject}\n\n {body}'
-        smtp.sendmail(EMAIL_ADDRESS,user.email,msg)
-    
+        msg = f'Subject: {subject}\n\n {body}'
+        smtp.sendmail(EMAIL_ADDRESS, user.email, msg)
