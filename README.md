@@ -1,6 +1,6 @@
 # CREATED A BLOG-SITE FOR LEARNING flask BACKEND
 
-### hosted at - flaskblog.divyasheel.com
+### hosted at - [flaskblog.divyasheel.com](flaskblog.divyasheel.com)
 
 ## Getting started - LINUX
   * Install pip
